@@ -13,7 +13,7 @@ WordPress specifically has various related extensions, but none of them (not eve
 
 # Usage
 1. Replace the text with your site's text.
-1. Replace the iframe tags with your ones.
+1. Replace the `iframe` tags with your ones.
 1. (Optionally) `dualchat` setting: control if you want multiple chats at the same time (default is no).
 1. (Optionally) `chatlang` setting: choose which languages you want (default is all).
 
