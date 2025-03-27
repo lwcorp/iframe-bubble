@@ -7,80 +7,81 @@ function my_chat_enqueue_assets() {
     wp_register_style('my-chat-style', false);
     wp_enqueue_style('my-chat-style');
     $chat_css = "
-      /* Merged Chat Balloon styles */
-      .chat-balloon { 
-        position: fixed; 
-        bottom: 20px; 
-        width: 60px; 
-        height: 60px; 
-        cursor: pointer; 
-        z-index: 1000; 
+      .chat-balloon {
+        position: fixed;
+        bottom: 20px;
+        width: 60px;
+        height: 60px;
+        cursor: pointer;
+        z-index: 1000;
       }
-      .chat-balloon svg { 
-        width: 100%; 
-        height: auto; 
-        border-radius: 50%; 
+      .chat-balloon svg {
+        width: 100%;
+        height: auto;
+        border-radius: 50%;
       }
-      .chat-balloon.he { right: 20px; }
-      .chat-balloon.en { left: 20px; }
-
-      /* Merged Chat Modal styles */
-      .chat-modal { 
-        position: fixed; 
-        bottom: 20px; 
-        background: #fff; 
-        z-index: 1001; 
-        border-radius: 5px; 
-        overflow: visible; 
-        opacity: 0; 
-        pointer-events: none; 
-        transform: translateY(100%); 
-        transition: transform 0.5s ease, opacity 0.5s ease; 
+      .chat-balloon.he {
+        right: 20px;
       }
-      .chat-modal.active { 
-        opacity: 1; 
-        pointer-events: auto; 
-        transform: translateY(0); 
+      .chat-balloon.en {
+        left: 20px;
       }
-      .chat-modal.he { 
-        right: 20px; 
-        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.3); 
+      
+      .chat-modal {
+        position: fixed;
+        bottom: 20px;
+        background: #fff;
+        z-index: 1001;
+        border-radius: 5px;
+        overflow: visible;
+        opacity: 0;
+        pointer-events: none;
+        transform: translateY(100%);
+        transition: transform 0.5s ease, opacity 0.5s ease;
       }
-      .chat-modal.en { 
-        left: 20px; 
-        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.3); 
+      .chat-modal.active {
+        opacity: 1;
+        pointer-events: auto;
+        transform: translateY(0);
       }
-
-      /* Common Close Button Style for both chats */
-      .chat-modal-close { 
-        position: absolute; 
-        width: 30px; 
-        height: 30px; 
-        display: flex; 
-        align-items: center; 
-        justify-content: center; 
-        background: #fff; 
-        border: 1px solid #ccc; 
-        border-radius: 50%; 
-        font-size: 1.5em; 
-        cursor: pointer; 
-        color: #333; 
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3); 
-        z-index: 1002; 
+      .chat-modal.he {
+        right: 20px;
+        box-shadow: -2px 0 4px rgba(0, 0, 0, 0.3);
       }
-      .chat-modal-close.he { 
-        top: -15px; 
-        left: -25px; 
+      .chat-modal.en {
+        left: 20px;
+        box-shadow: 2px 0 4px rgba(0, 0, 0, 0.3);
       }
-      .chat-modal-close.en { 
-        top: -25px; 
-        right: -25px; 
+      
+      .chat-modal-close {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #fff;
+        border: 1px solid #ccc;
+        border-radius: 50%;
+        font-size: 1.5em;
+        cursor: pointer;
+        color: #333;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        z-index: 1002;
+      }
+      .chat-modal-close.he {
+        top: -15px;
+        left: -25px;
+      }
+      .chat-modal-close.en {
+        top: -25px;
+        right: -25px;
       }
       @media (prefers-color-scheme: dark) {
-        .chat-modal-close { 
-          background: #333; 
-          border: 1px solid #404040; 
-          color: #fff; 
+        .chat-modal-close {
+          background: #333;
+          border: 1px solid #404040;
+          color: #fff;
         }
       }
     ";
@@ -90,91 +91,102 @@ function my_chat_enqueue_assets() {
     wp_register_script('my-chat-script', false);
     wp_enqueue_script('my-chat-script');
     $chat_js = "
-      document.addEventListener('DOMContentLoaded', function() {
-        // Allow opening multiple bubbles simultaneously
-        var dualchat = false;
-        // Added chatlang parameter to control which chat bubbles appear
-        var chatlang = 'en,he'; // Can be empty string, all, or comma-separated languages like en,he
+    document.addEventListener('DOMContentLoaded', genChatballon());
+	function genChatballon() {
+	  // You can change the following - Start
+      // Allow opening multiple bubbles simultaneously
+      var dualchat_default = false;
+      // Added chatlang parameter to control which chat bubbles appear
+      var chatlang_default = 'en,he'; // Can be empty string, all, or comma-separated languages like en,he
+	  // You can change the following - End
+	  
+	  // Determine settings
+	  const dualchat = document.forms[0]?.dualchat?.checked || dualchat_default;
+	  const chatlang = document.forms[0]?.chatlang?.value || chatlang_default;
 
-        // Hebrew Chat listeners
-        var chatBalloon = document.querySelector('.chat-balloon.he');
-        var chatModal = document.querySelector('.chat-modal.he');
-        var chatModalClose = document.querySelector('.chat-modal.he .chat-modal-close');
-        var iframeContainer = document.getElementById('iframe-container');
-        var iframeMarkup = document.getElementById('iframe-markup').value.trim();
-
-        // English Chat listeners
-        var chatBalloonEn = document.querySelector('.chat-balloon.en');
-        var chatModalEn = document.querySelector('.chat-modal.en');
-        var chatModalCloseEn = document.querySelector('.chat-modal.en .chat-modal-close');
-        var iframeContainerEn = document.getElementById('iframe-container-en');
-        var iframeMarkupEn = document.getElementById('iframe-markup-en').value.trim();
+      // Hebrew Chat listeners
+      var chatBalloon = document.querySelector('.chat-balloon.he');
+      var chatModal = document.querySelector('.chat-modal.he');
+      var chatModalClose = document.querySelector('.chat-modal.he .chat-modal-close');
+      var iframeContainer = document.getElementById('iframe-container');
+	  const iframeMarkup = document.forms[0]?.iframe_rtl?.value || document.getElementById('iframe-markup').value.trim();
+    
+      // English Chat listeners
+      var chatBalloonEn = document.querySelector('.chat-balloon.en');
+      var chatModalEn = document.querySelector('.chat-modal.en');
+      var chatModalCloseEn = document.querySelector('.chat-modal.en .chat-modal-close');
+      var iframeContainerEn = document.getElementById('iframe-container-en');
+	  const iframeMarkupEn = document.forms[0]?.iframe_ltr?.value || document.getElementById('iframe-markup-en').value.trim();
+      
+      // Function to control chat bubble visibility based on chatlang
+      function updateChatBubbleVisibility() {
+        // Hide all chat bubbles by default
+        chatBalloon.style.display = 'none';
+        chatBalloonEn.style.display = 'none';
         
-        // Function to control chat bubble visibility based on chatlang
-        function updateChatBubbleVisibility() {
-          // Hide all chat bubbles by default
-          chatBalloon.style.display = 'none';
-          chatBalloonEn.style.display = 'none';
-          
-          // If chatlang is empty, no bubbles should appear
-          if (!chatlang) {
-            return;
-          }
-          
-          // If chatlang is 'all', show both bubbles
-          if (chatlang === 'all') {
-            chatBalloon.style.display = 'block';
-            chatBalloonEn.style.display = 'block';
-            return;
-          }
-          
-          // For comma-separated string, remove all spaces first, then split
-          var languages = chatlang.replace(/\\s+/g, '').split(',');
-          
-          if (languages.includes('he')) {
-            chatBalloon.style.display = 'block';
-          }
-          
-          if (languages.includes('en')) {
-            chatBalloonEn.style.display = 'block';
-          }
+        // If chatlang is empty, no bubbles should appear
+        if (!chatlang) {
+          return;
         }
         
-        // Initialize chat bubble visibility
-        updateChatBubbleVisibility();
+        // If chatlang is 'all', show both bubbles
+        if (chatlang === 'all') {
+          chatBalloon.style.display = 'block';
+          chatBalloonEn.style.display = 'block';
+          return;
+        }
+        
+        var languages = chatlang.replace(/\s+/g, '').split(',');
+        
+        if (languages.includes('he')) {
+          chatBalloon.style.display = 'block';
+        }
+        
+        if (languages.includes('en')) {
+          chatBalloonEn.style.display = 'block';
+        }
+      }
+      
+      // Initialize chat bubble visibility
+      updateChatBubbleVisibility();
+	  
+ 	  chatBalloon.removeEventListener('click', parent.iframeOpenWrapper);
+	  chatBalloonEn.removeEventListener('click', parent.iframeOpenWrapperEn);
+	  chatModalClose.removeEventListener('click', parent.iframeCloseWrapper);
+	  chatModalCloseEn.removeEventListener('click', parent.iframeCloseWrapperEn);
 
-        chatBalloon.addEventListener('click', function() {
-          if (!iframeContainer.innerHTML.trim()) {
-            iframeContainer.innerHTML = iframeMarkup;
-          }
-          // Close English chat modal if dualchat is false
-          if (!dualchat) {
-            document.querySelector('.chat-modal.en').classList.remove('active');
-          }
-          chatModal.classList.add('active');
-        });
-
-        chatModalClose.addEventListener('click', function(e) {
-          e.preventDefault();
-          chatModal.classList.remove('active');
-        });
-
-        chatBalloonEn.addEventListener('click', function() {
-          if (!iframeContainerEn.innerHTML.trim()) {
-            iframeContainerEn.innerHTML = iframeMarkupEn;
-          }
-          // Close Hebrew chat modal if dualchat is false
-          if (!dualchat) {
-            document.querySelector('.chat-modal.he').classList.remove('active');
-          }
-          chatModalEn.classList.add('active');
-        });
-
-        chatModalCloseEn.addEventListener('click', function(e) {
-          e.preventDefault();
-          chatModalEn.classList.remove('active');
-        });
-      });
+      parent.iframeOpenWrapper = function(e) {
+	    iframeOpen(iframeContainer, iframeMarkup, chatModal, dualchat, '.chat-modal.en');
+	  }
+      parent.iframeOpenWrapperEn = function(e) {
+  		iframeOpen(iframeContainerEn, iframeMarkupEn, chatModalEn, dualchat, '.chat-modal.he');
+	  }
+      parent.iframeCloseWrapper = function(e) {
+		iframeClose(e, chatModal);
+	  }
+      parent.iframeCloseWrapperEn = function(e) {
+	    iframeClose(e, chatModalEn);
+	  }
+	  
+	  chatBalloon.addEventListener('click', parent.iframeOpenWrapper);
+	  chatBalloonEn.addEventListener('click', parent.iframeOpenWrapperEn);
+	  chatModalClose.addEventListener('click', parent.iframeCloseWrapper);
+	  chatModalCloseEn.addEventListener('click', parent.iframeCloseWrapperEn);
+	  
+	  function iframeOpen(container, markup, modal, dualchat, elm) {
+        container.innerHTML = markup;
+        // If dualchat is false, close the previous chat modal before opening another chat one
+        if (!dualchat) {
+          document.querySelector(elm).classList.remove('active');
+        }
+        modal.classList.add('active');
+      }
+	  
+	  function iframeClose(evt, elm) {
+        evt.preventDefault();
+        elm.classList.remove('active');
+      }
+    }
     ";
     wp_add_inline_script('my-chat-script', $chat_js);
 }
