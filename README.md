@@ -22,5 +22,8 @@ The WordPress version uses [add_action](https://developer.wordpress.org/referenc
 
 It can be applied easily with an extension like [Code Snippets](https://wordpress.org/plugins/code-snippets/).
 
+# Demo
+You can try your own iframe and settings in a live demo via the link in the About section.
+
 # Screenshot
 ![balloons](https://github.com/user-attachments/assets/930138d5-54ff-4379-8ec4-e3d853bfb00a)
