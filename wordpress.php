@@ -88,7 +88,7 @@ function my_chat_enqueue_assets() {
     wp_add_inline_style('my-chat-style', $chat_css);
 
     // Register and enqueue an empty JS handle to which we attach our inline JavaScript.
-    wp_register_script('my-chat-script', false);
+    wp_register_script('my-chat-script', false, [], false, true);
     wp_enqueue_script('my-chat-script');
     $chat_js = "
     document.addEventListener('DOMContentLoaded', genChatballon());
